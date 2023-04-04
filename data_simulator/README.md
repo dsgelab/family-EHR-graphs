@@ -79,7 +79,7 @@ Mother	Father	Offspring	AgeDoI	AgeDoILiab-1	Age10YLiab-1	Gender	GenderLiab-1	Her
 0	0	100008	41.86	0.5027	0.7134	1	0.6325	0.8135	-0.1893	1.7594	1.9701	1	1
 </pre>
 
-`Mother` and `Father` denote the parents of each synthetic individual. 0 indicates the individual is from the ancestry generation (generation 1). `Offspring` is the individual that current row of information corresponds to.
+`Mother` and `Father` denote the parents of each synthetic individual. 0 indicates the individual is from the ancestry generation (generation 1). `Offspring` is the individual that current row of information corresponds to. First digit of the individual ID indicates the generation that one is from. e.g. 100008 indicates this is the 9-th individual (individual counter starts from 0, so 8+1) generated for the 1st generation; and 300240 would be the 241-th for the 3rd generation.
 
 `AgeDoI` is `Offspring`'s age at date of interest. It should be within the rage you specified with `AgeLower` and `AgeUpper`. 
 * Note that in the output of this simulation, we may see offspring's age > parents' age. Therefore `AgeDoI` can also be conceptually interprated as "the maximum age one could reach by the date of interest".

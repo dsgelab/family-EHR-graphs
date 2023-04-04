@@ -42,11 +42,11 @@ OutPrefix TestOut
 
 `nGeneration` is an integer indicating total number of generations you would like to simulate. Current maximum is 10. You can increase it by changing the number in line 14 of the _SimPedPheno_V1.1.c_ file `#define nMaxGen 10` and recompile.
 
-`nIndividual` is an integer indicating total number of individuals you would like to simulate ##for each generation##. Current maximum is 100000. You can increase it by changing the number in line 13 of the _SimPedPheno_V1.1.c_ file `#define nMaxIndPerGen 100000` and recompile.
+`nIndividual` is an integer indicating total number of individuals you would like to simulate **for each generation**. Current maximum is 100000. You can increase it by changing the number in line 13 of the _SimPedPheno_V1.1.c_ file `#define nMaxIndPerGen 100000` and recompile.
 
 `OutPrefix` is your prefered location and prefix for the output.
 
-* You can also simulate multiple correlated phenotypes (maximum 10, can be changed on line 15 of _SimPedPheno_V1.1.c_) if needed. In this case, `Prevalence`, `MaternalWeight`, `AgeEffect`, `SexEffect`, `Herritable` should be comma seperated values for each phenotye of interest, and one additional parameter `TraitCorrelation` indicating the correlation of ##familal and enviromental (noise) risk## between each phenotype and the first one. So the first element of `TraitCorrelation` should always be 1, since it is the correlation between the first trait and itself. An example parameter file for multitrait simulation can be found below:
+* You can also simulate multiple correlated phenotypes (maximum 10, can be changed on line 15 of _SimPedPheno_V1.1.c_) if needed. In this case, `Prevalence`, `MaternalWeight`, `AgeEffect`, `SexEffect`, `Herritable` should be comma seperated values for each phenotye of interest, and one additional parameter `TraitCorrelation` indicating the correlation of **familal and enviromental (noise) risk** between each phenotype and the first one. So the first element of `TraitCorrelation` should always be 1, since it is the correlation between the first trait and itself. An example parameter file for multitrait simulation can be found below:
 
 <pre>
 Prevalence 0.3,0.1

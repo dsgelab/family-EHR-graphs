@@ -1,0 +1,14 @@
+name,type
+EndPtStat,label
+maxAgeDoI,static
+Gender,static
+EndPtBefore,static
+weight,edge
+target,edge
+parent,edge
+sibling_full,edge
+sibling_half,edge
+grandparent,edge
+aunt_or_uncle_full,edge
+aunt_or_uncle_half,edge
+cousin_full,edge

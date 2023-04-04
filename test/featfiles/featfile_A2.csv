@@ -1,0 +1,16 @@
+name,type
+EndPtStat,label
+maxAgeDoI,static
+Gender,static
+moEndPt,static
+faEndPt,static
+cousinEndPt_Binary,static
+grandparentEndPt_Binary,static
+aunt_or_uncleEndPt_Binary,static
+fullsibEndPt_Binary,static
+halfsibEndPt_Binary,static
+cousinEndPt_Missing,static
+grandparentEndPt_Missing,static
+aunt_or_uncleEndPt_Missing,static
+fullsibEndPt_Missing,static
+halfsibEndPt_Missing,static

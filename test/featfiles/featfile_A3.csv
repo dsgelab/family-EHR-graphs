@@ -1,0 +1,12 @@
+name,type
+EndPtStat,label
+maxAgeDoI,static
+Gender,static
+graph_emb_dim0,static
+graph_emb_dim1,static
+graph_emb_dim2,static
+graph_emb_dim3,static
+graph_emb_dim4,static
+graph_emb_dim5,static
+graph_emb_dim6,static
+graph_emb_dim7,static

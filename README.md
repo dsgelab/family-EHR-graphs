@@ -3,7 +3,7 @@
 This repository contains code for running the models presented in the manuscript "Characterizing personalized effects of family information on
 disease risk using graph representation learning".
 
-Authors: Sophie Wharrie, Zhiyu Yang
+Code authors: Sophie Wharrie, Zhiyu Yang
 
 ## Software dependencies
 
@@ -29,13 +29,29 @@ pip install torch-cluster -f https://data.pyg.org/whl/torch-1.12.0+cu102.html
 
 - This work is based on a nationwide health registry dataset, which cannot be publicly shared for data privacy reasons
 - We provide code and instructions in the `data_simulator` directory for generating (non-longitudinal) synthetic datasets that mimic the key properties of the real dataset
-- An example dataset in the input format expected by the ML models is available in the `test` directory
+- An example of a synthetic dataset in the input format expected by the ML models is available in the `test` directory
 
-Data inputs:
-- **Maskfile**: specifies the train/test/validate loss split (train column; -1=ignore, 0=train, 1=validate, 2=test), which samples are target/graph samples (target column; 1=target sample, 0=graph but not target sample), and the prediction label (label column; 0 or 1), for all nodes (node_id column; indexed from 0)
-- **Statfile**: static features for the target and graph samples (see `test/featfiles` for list of feature names for each model)
-- **Edgefile**: list of edges for each of the family graphs (node1, node2, target_patient) and the edge features (weight, etc.)
-- **Featfile**: feature file describing which (static, longitudinal, label and edge) features to use in the model
+### Data inputs
+
+**Maskfile**: Specifies which samples are target/graph samples and the train/validation/test splits. Each row of the file represents a patient, with the following column structure:
+
+| PATIENTID | train | graph | target | node_id |
+|---|---|---|---|---|
+| A unique (string or float) identifier for the patient. Doesn't following any formatting requirements, so can be specific to your dataset. | Specifies whether the patient is in the train/validation/test sets. Possible values are 0=train, 1=validation, 2=test, -1=ignore. Non-target patients should be set to -1 | Specifies whether the patient is a graph sample, i.e., a target sample or a relative of at least one target sample. Possible values are 1=graph patient, 0=non-graph patient | Specifies whether the patient is a target sample, i.e., the set of patients for which the algorithm is learning to predict health outcomes. Possible values are 1=target patient, 0=non-target patient | A unique identifier for the patient, indexed from 0, in ascending order, i.e., 0, 1, ... |
+
+**Featfile**: Feature file describing which (static, longitudinal, label and edge) features to use for training the model. See `test/featfiles` for examples of feature files for each of the models presented in the code. In general, the `Featfile` has the following column structure:
+
+| name | type |
+|---|---|
+| The name of the feature, which corresponds to the column name in the `Statfile` | The feature type, with possible values being `label`, `static`, `longitudinal` and `edge` |
+
+**Statfile**: Static features for the target and graph samples and the label being predicted. The columns can include any features you want. The only required columns are `PATIENTID` (corresponding to the same patient identifiers used in the `Maskfile`) and a column for the label. The `Statfile` should include all the same patients and in the same order as the `Maskfile`. Note that the label should be binary because the code expects a binary classification task.
+
+**Edgefile**: List of edge pairs for each of the family graphs. Note that the `weight` edge feature is mandatory but additional edge features are optional. Assumes an undirected graph.
+
+| node1 | node2 | target_patient | weight | ... |
+|---|---|---|---|---|
+| The identifier for the first patient in the edge pair, corresponding to a `node_id` from the `Maskfile` | The identifier for the second patient in the edge pair, corresponding to a `node_id` from the `Maskfile` | The identifier for the target patient, corresponding to a `node_id` from the `Maskfile`. The code assumes that the edge `(node1, node2)` belongs to the family graph for this target patient | The edge weight (float) | Additional edge features are optional |
 
 ## Models
 

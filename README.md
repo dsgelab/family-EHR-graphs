@@ -1,13 +1,22 @@
 # Graph representation learning for familial relationships
 
-This repository contains code for running the models presented in the manuscript "Characterizing personalized effects of family information on
-disease risk using graph representation learning".
+This repository contains code for running the models presented in the manuscript ["Characterizing personalized effects of family information on disease risk using graph representation learning"](https://arxiv.org/abs/2304.05010).
 
 Code authors: Sophie Wharrie, Zhiyu Yang
 
+## Overview of method
+
+![Overview of model. Graph data structure for longitudinal EHRs up to third-degree relatives. GNN and LSTM based classifier predicts health outcomes in the target cohort. Graph explainability identifies important nodes, edges and features from relatives.](graphical_abstract.png)
+
+a) Graph data structure for longitudinal EHRs of the target individual and their relatives
+
+b) GNN and LSTM based classifier predicts health outcomes in the target cohort
+
+c) Graph explainability identifies important nodes, edges and features from relatives for predicting disease risk in the target individual
+
 ## Software dependencies
 
-###  Python
+###  Python conda environment
 
 See `environment.yml` for full details of packages and versions used in our experiments
 
@@ -25,33 +34,90 @@ conda install -c anaconda seaborn
 pip install torch-cluster -f https://data.pyg.org/whl/torch-1.12.0+cu102.html
 ```
 
-## Data
+## Synthetic data
 
-- This work is based on a nationwide health registry dataset, which cannot be publicly shared for data privacy reasons
-- We provide code and instructions in the `data_simulator` directory for generating (non-longitudinal) synthetic datasets that mimic the key properties of the real dataset
-- An example of a synthetic dataset in the input format expected by the ML models is available in the `test` directory
+The experiments in the paper use a nationwide health registry dataset, which cannot be publicly shared for data privacy reasons. Therefore, we provide code and instructions in the `data_simulator` directory for generating (non-longitudinal) synthetic datasets that mimic the key properties of the real dataset. An example of a synthetic dataset in the input format expected by the ML models is available in the `test` directory.
 
-### Data inputs
+## Data inputs
 
-**Maskfile**: Specifies which samples are target/graph samples and the train/validation/test splits. Each row of the file represents a patient, with the following column structure:
+The model requires 4 input files:
+- **Maskfile**: Specifies which samples belong to the target cohort (patients to predict health outcomes for) and which samples belong to the graph cohort (relatives of the target patients). This file also specifies the train, validation and test split for the dataset. 
+- **Statfile**: Contains the (static node) feature dataset for all samples in both the target and graph cohorts. This file also contains the data for the label being predicted for the binary classification task.
+- **Featfile**: Specifies which features to use for training the model, for 4 types of features: `static`, `longitudinal`, `label` and `edge`.
+- **Edgefile**: Contains the edge pairs for the family graphs, where each patient in the target cohort has a separate family graph. This file also contains the data for the edge features.
+
+See details for the format of each file type below.
+
+### Maskfile
+
+Each row of the file represents a patient, with the following column structure:
+- PATIENTID: A unique (string or float) identifier for the patient. Doesn't follow any formatting requirements, so it can be specific to your dataset
+- train: Specifies whether the patient is in the train/validation/test sets. Possible values are 0=train, 1=validation, 2=test, -1=ignore. Non-target patients should be set to -1
+- graph: Specifies whether the patient is a graph sample, i.e., a target sample or a relative of at least one target sample. Possible values are 1=graph patient, 0=non-graph patient 
+- target: Specifies whether the patient is a target sample, i.e., the set of patients for which the algorithm is learning to predict health outcomes. Possible values are 1=target patient, 0=non-target patient
+- node_id: A unique identifier for the patient, indexed from 0, in ascending order, i.e., 0, 1, ...
+
+Example:
 
 | PATIENTID | train | graph | target | node_id |
 |---|---|---|---|---|
-| A unique (string or float) identifier for the patient. Doesn't follow any formatting requirements, so it can be specific to your dataset | Specifies whether the patient is in the train/validation/test sets. Possible values are 0=train, 1=validation, 2=test, -1=ignore. Non-target patients should be set to -1 | Specifies whether the patient is a graph sample, i.e., a target sample or a relative of at least one target sample. Possible values are 1=graph patient, 0=non-graph patient | Specifies whether the patient is a target sample, i.e., the set of patients for which the algorithm is learning to predict health outcomes. Possible values are 1=target patient, 0=non-target patient | A unique identifier for the patient, indexed from 0, in ascending order, i.e., 0, 1, ... |
+| ID0001 | 0 | 1 | 1 | 0 |
+| ID0002 | 1 | 1 | 1 | 1 |
+| ID0003 | 2 | 1 | 1 | 2 |
+| ID0004 | -1 | 1 | 0 | 3 |
+| ID0005 | -1 | 1 | 0 | 4 |
 
-**Featfile**: Feature file describing which (static, longitudinal, label and edge) features to use for training the model. See `test/featfiles` for examples of feature files for each of the models presented in the code. In general, the `Featfile` has the following column structure:
+### Featfile
+
+Each row of the file represents a feature in the dataset, with the following column structure:
+- name:  The name of the feature. Note: `static` and `label` feature names should exist as columns in the `Statfile`, `edge` feature names should exist as columns in the `Edgefile`. See the note in the Models section for `longitudinal` features.
+- type: The feature type, with possible values being `label`, `static`, `longitudinal` and `edge`. The `static` and `longitudinal` features correspond to different types of node features in the graph, the `edge` features correspond to edge features (weights) in the graph, and the `label` corresponds to the variable being predicted
+
+Example: 
 
 | name | type |
 |---|---|
-| The name of the feature, which corresponds to the column name in the `Statfile` (for `label` and `static` features), `Edgefile` (for `edge` features) or backend database (for `longitudinal` features) | The feature type, with possible values being `label`, `static`, `longitudinal` and `edge` |
+|healthOutcome|label|
+|age|static|
+|sex|static|
+|medicalHistory|static|
+|relatednessWeight|edge|
 
-**Statfile**: Static features for the target and graph samples and the label being predicted. The columns can include any features you want. The only required columns are `PATIENTID` (corresponding to the same patient identifiers used in the `Maskfile`) and a column for the label. The `Statfile` should include all the same patients and in the same order as the `Maskfile`. Note that the label should be binary because the code expects a binary classification task.
+See the `test/featfiles` directory for examples of feature files for each of the models used for the experiments in the paper.
 
-**Edgefile**: List of edge pairs for each of the family graphs. Note that the `weight` edge feature is mandatory but additional edge features are optional. Assumes an undirected graph.
+### Statfile
 
-| node1 | node2 | target_patient | weight | ... |
+Each row represents the feature and label data for a patient. The only required columns are `PATIENTID` (corresponding to the same patient identifiers used in the `Maskfile`) and a column for the (binary classification) label. Other columns for the features can use any names that you want and if a column name isn't specified in the `Featfile` then the code will ignore the feature during training. The `Statfile` should include all the same patients and in the same order as the `Maskfile`. 
+
+Example:
+
+| PATIENTID | healthOutcome | age | sex | medicalHistory |
 |---|---|---|---|---|
-| The identifier for the first patient in the edge pair, corresponding to a `node_id` from the `Maskfile` | The identifier for the second patient in the edge pair, corresponding to a `node_id` from the `Maskfile` | The identifier for the target patient, corresponding to a `node_id` from the `Maskfile`. The code assumes that the edge `(node1, node2)` belongs to the family graph for this target patient | The edge weight (float) | Additional edge features are optional |
+| ID0001 | 0 | 34 | 1 | 0 |
+| ID0002 | 1 | 43 | 0 | 0 |
+| ID0003 | 0 | 24 | 1 | 0 |
+| ID0004 | 1 | 50 | 1 | 1 |
+| ID0005 | 0 | 65 | 0 | 0 |
+
+### Edgefile
+
+Each row represents an edge pair in a target patient's (undirected) family graph, with the following column structure:
+- node1: The identifier for the first patient in the edge pair, corresponding to a `node_id` from the `Maskfile`
+- node2: The identifier for the second patient in the edge pair, corresponding to a `node_id` from the `Maskfile`
+- target_patient: The identifier for the target patient, corresponding to a `node_id` from the `Maskfile`. The code assumes that the edge `(node1, node2)` belongs to the family graph for this target patient
+- weight: The edge weight
+- ... (additional columns for edge features are optional)
+
+Example:
+
+| node1 | node2 | target_patient | weight |
+|---|---|---|---|
+| 0 | 1 | 0 | 0.5 | 
+| 0 | 3 | 0 | 0.25 | 
+| 1 | 0 | 1 | 0.5 | 
+| 1 | 2 | 1 | 0.25 |
+| 1 | 4 | 1 | 0.25 | 
+| 2 | 4 | 1 | 0.5 |
 
 ## Models
 
@@ -63,7 +129,7 @@ Model outputs:
 - ...results.csv: actual and predicted values for the test dataset
 - ...stats.csv: summary statistics including full list of hyperparameters used and evaluation metric values calculated for the test dataset
 
-**NOTE for longitudinal models:** If you would like to use longitudinal EHR data you need to connect your own database backend, i.e. by updating the code in `src/data.py`. For testing purposes, the scripts provided below use the `--local_test` flag to simulate random values for models that require longitudinal data.
+:warning: **IMPORTANT NOTE for longitudinal models:** In our experiments we used a SQLite backend to store and load large longitudinal EHR datasets that don't fit in memory. If you are using the longitudinal models, you should first update the code to connect your own dataset, i.e. by updating the code in `src/data.py`. For testing purposes, the scripts provided below use the `--local_test` flag to simulate random values for models that require longitudinal data.
 
 ### Setup
 
@@ -136,7 +202,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ### Age, sex and longitudinal EHR data LSTM (A4)
 
-A combined MLP-LSTM model that in addition to age and sex features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A4.csv`. Note that the script uses the `--local_test` flag.
+:warning: A combined MLP-LSTM model that in addition to age and sex features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A4.csv`. Note that the script uses the `--local_test` flag.
 
 ```
 featfile=test/featfiles/featfile_A4.csv
@@ -148,7 +214,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ### Age, sex, family history and longitudinal EHR data LSTM (A5)
 
-A combined MLP-LSTM model that in addition to age, sex and family history features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A5.csv`. Note that the script uses the `--local_test` flag.
+:warning: A combined MLP-LSTM model that in addition to age, sex and family history features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A5.csv`. Note that the script uses the `--local_test` flag.
 
 ```
 featfile=test/featfiles/featfile_A5.csv
@@ -174,7 +240,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ### Graph model, with longitudinal data (G2)
 
-The GNN model for longitudinal data. Corresponds to the feature files `test/featfiles/featfile_G2.csv` (for the family component) and `test/featfiles/featfile_A5.csv` (for the target component). Note that the script uses the `--local_test` flag.
+:warning: The GNN model for longitudinal data. Corresponds to the feature files `test/featfiles/featfile_G2.csv` (for the family component) and `test/featfiles/featfile_A5.csv` (for the target component). Note that the script uses the `--local_test` flag.
 
 ```
 featfile=test/featfiles/featfile_G2.csv # for family
@@ -188,7 +254,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ## Explainability analysis
 
-The explainability analysis is implemented for GNN-LSTM models. Outputs include `...nodes.csv` for node and node feature explainability, `...edges.csv` for edge explainability, and `...embeddings.csv` for the graph embeddings output.
+:warning: The explainability analysis is implemented for GNN-LSTM models. Outputs include `...nodes.csv` for node and node feature explainability, `...edges.csv` for edge explainability, and `...embeddings.csv` for the graph embeddings output.
 
 Instructions:
 

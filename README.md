@@ -133,7 +133,7 @@ Model outputs:
 
 ### Setup
 
-In the command line, initialize the following filepaths and hyperparameters:
+The hyperparameter values used in experiments are printed below. This can be run as a command line script before running the individual model scripts provided in the following sections. Note that not all hyperparameters are required for all models. See `main.py` for descriptions of the hyperparameters.
 
 ```
 outpath=results
@@ -163,6 +163,7 @@ delta=1
 dropout_rate=0.5
 device=na # this will use GPU by default, change the value to cpu if you don't want this
 ```
+
 
 ### Age and sex MLP (A1)
 
@@ -202,7 +203,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ### Age, sex and longitudinal EHR data LSTM (A4)
 
-:warning: A combined MLP-LSTM model that in addition to age and sex features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A4.csv`. Note that the script uses the `--local_test` flag.
+(:warning: - see note for longitudinal models) A combined MLP-LSTM model that in addition to age and sex features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A4.csv`. Note that the script uses the `--local_test` flag.
 
 ```
 featfile=test/featfiles/featfile_A4.csv
@@ -214,7 +215,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ### Age, sex, family history and longitudinal EHR data LSTM (A5)
 
-:warning: A combined MLP-LSTM model that in addition to age, sex and family history features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A5.csv`. Note that the script uses the `--local_test` flag.
+(:warning: - see note for longitudinal models) A combined MLP-LSTM model that in addition to age, sex and family history features, includes a single-layer. bidirectional LSTM for longitudinal EHR data. Corresponds to the feature file `test/featfiles/featfile_A5.csv`. Note that the script uses the `--local_test` flag.
 
 ```
 featfile=test/featfiles/featfile_A5.csv
@@ -240,7 +241,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ### Graph model, with longitudinal data (G2)
 
-:warning: The GNN model for longitudinal data. Corresponds to the feature files `test/featfiles/featfile_G2.csv` (for the family component) and `test/featfiles/featfile_A5.csv` (for the target component). Note that the script uses the `--local_test` flag.
+(:warning: - see note for longitudinal models) The GNN model for longitudinal data. Corresponds to the feature files `test/featfiles/featfile_G2.csv` (for the family component) and `test/featfiles/featfile_A5.csv` (for the target component). Note that the script uses the `--local_test` flag.
 
 ```
 featfile=test/featfiles/featfile_G2.csv # for family
@@ -254,7 +255,7 @@ python3 ./src/main.py --featfile ${featfile} --model_type ${model_type} --experi
 
 ## Explainability analysis
 
-:warning: The explainability analysis is implemented for GNN-LSTM models. Outputs include `...nodes.csv` for node and node feature explainability, `...edges.csv` for edge explainability, and `...embeddings.csv` for the graph embeddings output.
+(:warning: - see note for longitudinal models) The explainability analysis is implemented for GNN-LSTM models. Outputs include `...nodes.csv` for node and node feature explainability, `...edges.csv` for edge explainability, and `...embeddings.csv` for the graph embeddings output.
 
 Instructions:
 

@@ -1,6 +1,19 @@
 # Graph representation learning for familial relationships
 
-This repository contains code for running the models presented in the manuscript ["Characterizing personalized effects of family information on disease risk using graph representation learning"](https://arxiv.org/abs/2304.05010).
+This repository contains code for running the models presented in the paper ["Characterizing personalized effects of family information on disease risk using graph representation learning"](https://proceedings.mlr.press/v219/wharrie23a.html), published in Proceedings of the 8th Machine Learning for Healthcare Conference.
+
+**Citation**: Sophie Wharrie, Zhiyu Yang, Andrea Ganna, Samuel Kaski. (2023). Characterizing personalized effects of family information on disease risk using graph representation learning. Proceedings of the 8th Machine Learning for Healthcare Conference, in PMLR, 219:824-845. https://proceedings.mlr.press/v219/wharrie23a.html
+```
+@InProceedings{pmlr-v219-wharrie23a,
+  title = {Characterizing personalized effects of family information on disease risk using graph representation learning},
+  author = {Wharrie, Sophie and Yang, Zhiyu and Ganna, Andrea and Kaski, Samuel},
+  booktitle = {Proceedings of the 8th Machine Learning for Healthcare Conference},
+  pages = {824-845},
+  year = {2023},
+  volume = {219},
+  publisher = {PMLR},
+}
+```
 
 Code authors: Sophie Wharrie, Zhiyu Yang
 
